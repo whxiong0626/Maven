@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whx.dao.Country01Dao">
+    <!--关联映射多对一-->
+    <!-- 01. 根据省会的id 查询出 省会的信息-->
+    <select id="selectProvincialById" resultMap="ProvincialMap">
+        SELECT pid,pname,countryid FROM provincial WHERE pid=#{pid}
+    </select>
+    <!-- 02. 根据國家的id 查询出 对应国家的信息-->
+    <select id="CountryById" resultType="Country01">
+        SELECT cid,cname FROM country WHERE cid=#{cid}
+    </select>
+    <!-- Provincial01有一个属性的类型是 Country域属性
+       javaType:域属性对应的类型 -->
+    <resultMap id="ProvincialMap" type="Provincial01">
+        <id property="pid" column="pid"/>
+        <result property="pname" column="pname"/>
+        <association property="country" javaType="Country" select="CountryById" column="countryid"/>
+    </resultMap>
+</mapper>

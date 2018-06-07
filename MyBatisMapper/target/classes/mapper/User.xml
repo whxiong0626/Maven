@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whx.dao.UserDao">
+    <!--新增操作   id必须和UserDao中的方法名称一致-->
+    <insert id="add" parameterType="User">
+        /*因为我们的参数是User对象   所以 values中的值 必须是User类中的属性*/
+        INSERT  INTO  easybuy_user(userName,loginName,password,sex,identityCode,email,mobile,type)
+                  VALUES (#{userName},#{loginName},#{password},#{sex},#{identityCode},#{email},#{mobile},#{type})
+    </insert>
+
+      <!--查询用户id-->
+
+    <insert id="addId" parameterType="User">
+        INSERT  INTO  easybuy_user(userName,loginName,password,sex,identityCode,email,mobile,type)
+        VALUES (#{userName},#{loginName},#{password},#{sex},#{identityCode},#{email},#{mobile},#{type})
+        /* order="AFTER" 适用于mysql数据库
+        order="BEFORE" 适用于oracle数据库
+        */
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
+
+    <!--删除用户   传递一个id不是一个对象 所以我们在sql语句中就可以用占位符-->
+    <delete id="delete" parameterType="int">
+        DELETE FROM easybuy_user WHERE id=#{adc};
+    </delete>
+
+    <!--修改用户信息   传递的是一个User对象-->
+    <update id="update" parameterType="User">
+        UPDATE easybuy_user SET userName=#{userName},identityCode=#{identityCode},email=#{email},mobile=#{mobile} WHERE id=#{id}
+    </update>
+
+    <!--查询所有用户-->
+    <select id="findAll" resultType="User">
+        SELECT * FROM easybuy_user
+    </select>
+
+    <!--查询所有的User  返回值是map
+     如果我们写的是resultType="map"
+     那么mybatis在底层会把我们的每个字段当成key
+     字段对象的值 是value！  这样不可行！
+     我们是想把某一个字段当成key!
+     整行数据（对象）当成value！
+     这时候就需要把resultType换成resultMap(结果映射)="映射的resultMap名称"
+     mybatis底层会进行拦截ResultSet!
+     然后根据我们在resultMap中的配置，
+     把对应的key和value封装到map集合中！*
+   -->
+    <select id="findAllByMap" resultMap="userMap">
+        SELECT * FROM easybuy_user
+    </select>
+    <!--
+     01.数据库字段名和我们实体类属性名不一致   必须使用
+     02.返回结果是map集合时  必须使用
+     03.关联映射 以及延迟加载   必须使用
+   -->
+    <resultMap id="userMap" type="User">
+        <id property="id" column="id"/><!--只针对于主键的设置-->
+        <result property="loginName" column="loginName"/> <!--设置除了主键，集合，对象之外的属性-->
+        <result property="userName" column="userName"/>
+        <result property="password" column="password"/>
+        <result property="sex" column="sex"/>
+        <result property="identityCode" column="identityCode"/>
+        <result property="email" column="email"/>
+        <result property="mobile" column="mobile"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+    <!--查询指定用户信息-->
+    <select id="findById" parameterType="int" resultType="User">
+              SELECT * FROM easybuy_user WHERE id=#{abc}
+    </select>
+
+    <!--根据用户userName模糊查询
+    SELECT id,name,age FROM student  where name like '%' #{value} '%'
+   -->
+    <select id="findByName" resultType="User">
+        SELECT * FROM easybuy_user where userName like concat('%',#{abc},'%')
+    </select>
+    <!--根据用户userName和loginName模糊查询
+       -->
+    <select id="selectByMap" resultType="User">
+        SELECT * FROM easybuy_user where userName like concat('%',#{userName},'%') and loginName like concat('%',#{loginName},'%')
+    </select>
+
+    <!--索引-->
+    <select id="findParams1" resultType="User">
+        SELECT * from easybuy_user where userName LIKE concat('%',#{0},'%') and sex=#{1}
+    </select>
+
+    <!--注解-->
+    <select id="findParams2" resultType="User">
+        SELECT * from easybuy_user where userName LIKE concat('%',#{me},'%') and email like concat('%',#{em},'%')
+    </select>
+
+    <!--if语句判断-->
+    <select id="selectByIf" resultType="User">
+        SELECT * FROM  easybuy_user
+        <where>
+            <if test="userName!=null and userName!=''">
+                AND userName LIKE concat('%',#{userName},'%')
+            </if>
+            <if test="email!=null and email!=''">
+                and email like concat('%',#{email},'%')
+            </if>
+        </where>
+    </select>
+
+    <!--choose语句判断-->
+    <select id="selectByChoose" resultType="User">
+        SELECT * FROM  easybuy_user
+        <where>
+            <choose>
+                <when test="userName!=null and userName!=''">
+                   AND userName like concat('%',#{userName},'%')
+                </when>
+                <when test="loginName!=null and loginName!=''">
+                    and loginName like concat('%',#{loginName},'%')
+                </when>
+            </choose>
+        </where>
+    </select>
+
+    <!--Foreach数组  只要参数是 数组类型，mybatis默认的别名就是array-->
+    <select id="selectByForeach" resultType="User">
+        SELECT * FROM  easybuy_user
+        <if test="array.length>0">
+            WHERE id IN
+            <foreach collection="array" item="index" open="(" separator="," close=")">
+                #{index}
+            </foreach>
+        </if>
+    </select>
+
+    <!--foreach  list集合 只要参数是List类型，mybatis默认的别名就是list-->
+    <select id="selectByForeachList" resultType="User">
+        SELECT * FROM  easybuy_user
+        <if test="list.size>0">
+            WHERE id IN
+            <foreach collection="list" item="list" open="(" separator="," close=")">
+                #{list}
+            </foreach>
+        </if>
+    </select>
+</mapper>

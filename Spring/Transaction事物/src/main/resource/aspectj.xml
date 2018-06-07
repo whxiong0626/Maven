@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+         http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context
+         http://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop.xsd
+         http://www.springframework.org/schema/tx
+         http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!--  01.引入  jdbc文件-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!--  02.配置数据源-->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    <!--03.配置dao层-->
+    <bean id="accountDao" class="com.whx.dao.AccountDaoImpl">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean id="stockDao" class="com.whx.dao.StockDaoImpl">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--04.配置service层-->
+    <bean id="StockService" class="com.whx.service.StockServiceImpl">
+        <property name="accountDao" ref="accountDao"/>
+        <property name="stockDao" ref="stockDao"/>
+    </bean>
+
+    <!--05.无论使用什么方式 都必须创建事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--06.使用事务工厂-->
+    <bean id="proxyFactory" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <!--配置事务管理器-->
+        <property name="transactionManager" ref="transactionManager"/>
+        <!--配置目标对象-->
+        <property name="target" ref="StockService"/>
+        <!--配置切点-->
+        <property name="transactionAttributes">
+            <props>
+                <!--指定切入点
+                    01.事务隔离级别
+                    02.事务传播行为
+                    03.发生什么异常时？是回滚还是提交    - 回滚    +提交
+                 -->
+                <prop key="buyStock">ISOLATION_DEFAULT,PROPAGATION_REQUIRED,-BuyStockException</prop>
+            </props>
+        </property>
+    </bean>
+</beans>

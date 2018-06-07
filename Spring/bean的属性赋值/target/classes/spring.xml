@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+    <!--配置Grade对应的bean-->
+    <!--01.设值注入
+    <bean id="grade" class="com.whx.bean.Grade">
+            <property name="id" value="1"/>
+            <property name="gname" value="一年级"/>
+      </bean>
+      -->
+    <!--02 使用c命名空间
+    <bean id="grade" class="com.whx.bean.Grade" c:id="2" c:gname="2年级">
+    -->
+    <!--03 使用p命名空间注入 -->
+    <bean id="grade" class="com.whx.bean.Grade" p:id="1" p:gname="1年级"/>
+
+    <!--配置 Student对应的bean-->
+    <bean id="student" class="com.whx.bean.Student">
+            <!--普通属性-->
+        <property name="name" value="魏海雄"/>
+        <!--域属性  对象-->
+        <property name="grade" ref="grade"/>
+        <!--数组-->
+        <property name="names">
+            <array>
+                <value>数组1</value>
+                <value>数组2</value>
+            </array>
+        </property>
+        <!--list集合-->
+        <property name="list">
+            <list>
+                <value>list集合1</value>
+                <value>list集合2</value>
+            </list>
+        </property>
+        <!--set集合-->
+        <property name="set">
+            <set>
+                <value>set集合1</value>
+                <value>set集合2</value>
+            </set>
+        </property>
+        <!--map集合-->
+        <property name="map">
+            <map>
+                <entry key="id" value="1"/>
+                <entry key="name" value="map集合"/>
+                <entry key="address" value="北京市"/>
+            </map>
+        </property>
+        <!--properties属性-->
+        <property name="properties">
+            <props>
+                <prop key="id" >1</prop>
+                <prop key="name">properties属性</prop>
+                <prop key="address">天津市</prop>
+            </props>
+        </property>
+    </bean>
+</beans>

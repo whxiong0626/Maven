@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+         http://www.springframework.org/schema/context/spring-context.xsd">
+    <!--01. 配置目标对象   实际肯定是配置UserServiceImpl-->
+    <bean id="userDaoImpl" class="com.whx.dao.UserDaoImpl"/>
+
+    <!--02.配置前置通知-->
+    <bean  id="beforeAdvice" class="com.whx.advice.BeforeAdvice"/>
+
+
+
+    <!--03.配置工厂-->
+    <bean id="userProxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <!--配置目标对象-->
+        <property name="targetName" value="userDaoImpl"/>
+        <!--配置顾问-->
+        <property name="interceptorNames" value="myAdvisor"/>
+    </bean>
+
+
+    <!--04.配置顾问myAdvisor  RegexpMethodPointcutAdvisor -->
+    <bean id="myAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+        <!--配置通知    通知只是顾问的一个属性  -->
+        <property name="advice"  ref="beforeAdvice"/>
+        <!--配置切入点  使用正则表达式
+          com.xdf.dao.UserDaoImpl.eat  务必使用类名+方法名
+          . 代表任意单个字符
+          * 代表.字符出现的次数是0-N
+          ？:0 -1
+          +: 1-N
+         -->
+        <property name="patterns">
+            <array>
+                <!--  <value>.*e.*</value>  匹配 eat 和sleep-->
+                <!--  <value>com.xdf.dao.UserDaoImpl.ea.?</value>匹配 eat 和ea-->
+                <value>com.xdf.dao.UserDaoImpl.*e.*</value> <!--匹配 eat 和ea  e-->
+            </array>
+        </property>
+    </bean>
+</beans>
